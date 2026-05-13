@@ -16,6 +16,10 @@
             gap: 10px;
             grid-template-columns: repeat(3, 1fr);
         }
+
+        .album-card {
+            cursor: pointer;
+        }
     </style>
 
 {% endblock %}
@@ -30,7 +34,7 @@
         <div class="album-grid">
             {% for album in albums %}
                 {% if genre.match_album(album) %}
-                    <div style="background: white; padding: 10px;">
+                    <div class="album-card" style="background: white; padding: 10px;">
                         <img src="{{ album.cover_url }}" style="width: 100%">
                         <div>
                             <div><b>{{ album.title }}</b></div>
@@ -82,4 +86,24 @@
     {% endfor %}
 
 
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    (function () {
+        var lambUrl = "{{ url_for('static', filename='audio/Lamb - Lusty.mp3') }}";
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.album-card')) {
+                return;
+            }
+            if (e.target.closest('a')) {
+                return;
+            }
+            if (!window.potykMu || typeof window.potykMu.loadAndPlay !== 'function') {
+                return;
+            }
+            window.potykMu.loadAndPlay(lambUrl);
+        });
+    })();
+</script>
 {% endblock %}

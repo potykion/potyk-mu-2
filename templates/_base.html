@@ -132,15 +132,15 @@
             }
             analyser.getByteFrequencyData(freqData);
             var sum = 0;
-            for (var i = 0; i < BASS_BIN_COUNT; i++) {
+            var binN = Math.min(BASS_BIN_COUNT, freqData.length);
+            for (var i = 0; i < binN; i++) {
                 sum += freqData[i];
             }
-            var raw = sum / BASS_BIN_COUNT / 255;
+            var raw = sum / binN / 255;
             var drive = clamp(raw * BASS_GAIN, 0, 1);
             var target = BEAT_SLOW_S + (BEAT_FAST_S - BEAT_SLOW_S) * drive;
             smoothedBeatS += (target - smoothedBeatS) * SMOOTH;
             logo.style.setProperty('--beat-dur', smoothedBeatS.toFixed(3) + 's');
-            console.log(smoothedBeatS.toFixed(3) + 's');
             rafId = requestAnimationFrame(tickBeat);
         }
 
@@ -153,31 +153,45 @@
             }
         }
 
+        function beginAudioPlayback() {
+            return ensureAudioGraph()
+                .then(function () {
+                    return audioCtx.resume();
+                })
+                .then(function () {
+                    return audio.play();
+                })
+                .then(function () {
+                    setPlaying(true);
+                    stopBeatLoop();
+                    rafId = requestAnimationFrame(tickBeat);
+                });
+        }
+
         function toggle() {
             if (audio.paused) {
                 if (audio.ended) {
                     audio.currentTime = 0;
                 }
-                ensureAudioGraph()
-                    .then(function () {
-                        return audioCtx.resume();
-                    })
-                    .then(function () {
-                        return audio.play();
-                    })
-                    .then(function () {
-                        setPlaying(true);
-                        stopBeatLoop();
-                        rafId = requestAnimationFrame(tickBeat);
-                    })
-                    .catch(function () {
-                        setPlaying(false);
-                    });
+                beginAudioPlayback().catch(function () {
+                    setPlaying(false);
+                });
             } else {
                 audio.pause();
                 setPlaying(false);
             }
         }
+
+        function loadAndPlay(src) {
+            audio.src = src;
+            audio.load();
+            smoothedBeatS = BEAT_SLOW_S;
+            return beginAudioPlayback().catch(function () {
+                setPlaying(false);
+            });
+        }
+
+        window.potykMu = { loadAndPlay: loadAndPlay };
 
         logo.addEventListener('click', toggle);
         logo.addEventListener('keydown', function (e) {
@@ -191,5 +205,7 @@
         });
     })();
 </script>
+{% block page_scripts %}
+{% endblock %}
 </body>
 </html>

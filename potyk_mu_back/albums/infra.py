@@ -22,6 +22,7 @@ class AlbumRepo:
                 cover_url=row["cover_url"],
                 comment=row["comment"] or "",
                 fav_tracks=json.loads(row["fav_tracks"] or "[]"),
+                track_path=row["track_path"],
             )
             for row in rows
         ]

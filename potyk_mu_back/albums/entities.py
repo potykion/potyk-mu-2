@@ -13,3 +13,4 @@ class Album:
     cover_url: str
     comment: str
     fav_tracks: list[str]
+    track_path: str
