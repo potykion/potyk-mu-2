@@ -4,12 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>$PROJ</title>
+    <title>potyk-mu</title>
     <style>
         body {
             max-width: 700px;
             margin: auto;
             font-family: "Rubik", system-ui;
+        }
+
+        @keyframes beat {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
     </style>
 
@@ -19,28 +31,27 @@
 </head>
 
 
-<body>
-<header style="padding: 20px; display: flex; gap: 10px; ">
-    <a style="text-decoration: none;  " href="/">
-        /
-    </a>
-    <div style="flex-grow: 1"></div>
+<body style="background: limegreen">
+<header style="padding: 20px; display: flex; gap: 10px; justify-content: center; ">
+    <div style=" text-decoration: none; border: 2px solid black; font-weight: bold; color: black; border-radius: 10px; padding: 5px; background: limegreen;   animation: beat 0.01s infinite;
+" href="/">
 
-    <a style="text-decoration: none;  " href="/form">
-        /form
-    </a>
+        <span style="transform: rotate(180deg); display: inline-block">🔊</span>
+        potyk-mu
+        🔊
+    </div>
+
 
 </header>
-<hr style="margin-top: 0; margin-bottom:0">
 
 <main>
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
 
     {% block main %}

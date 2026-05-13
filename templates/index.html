@@ -1,10 +1,85 @@
 {% extends '_base.html' %}
 
 {% block style %}
+    <style>
+        h2 {
+            margin-bottom: 0;
+        }
+
+        .genre-desc {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        .album-grid {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(3, 1fr);
+        }
+    </style>
+
 {% endblock %}
 
 {% block main %}
-<h1>INDEX</h1>
+
+    {% for genre in genres %}
+        <div style="background: {{ genre.bg_color }}; color: {{ genre.text_color }};  padding: 10px; margin-bottom: 10px; ">
+            <h2 style="font-style: italic; text-transform: uppercase; margin-top: 0">{{ genre.title }}</h2>
+            <p class="genre-desc"><i>{{ genre.description }}</i></p>
+        </div>
+        <div class="album-grid">
+            {% for album in albums %}
+                {% if genre.match_album(album) %}
+                    <div style="background: white; padding: 10px;">
+                        <img src="{{ album.cover_url }}" style="width: 100%">
+                        <div>
+                            <div><b>{{ album.title }}</b></div>
+                            <div style="color: gray"><small>{{ album.artist }} • {{ album.year }}</small></div>
+
+                        </div>
+
+                        <hr>
+
+                        <div style="">
+                            <small>
+                                🎵:
+                                <i>{{ genre.remove_matching_tags(album) | join(', ') }}</i>
+                            </small>
+                        </div>
+
+                        <div>
+                            <small>
+                                📝:
+                                <i>
+                                    {{ album.comment }}
+                                </i>
+                            </small>
+                        </div>
+
+                        {% if album.fav_tracks %}
+                            <div>
+                                <small>
+                                    ❤️:
+                                    {{ album.fav_tracks | join(', ') }}
+                                </small>
+                            </div>
+                        {% endif %}
+
+                        <div>
+                            <small>
+                                🔗:
+                                <a href="{{ album.yandex_music_url }}">ym</a>,
+                                <a href="{{ album.rym_url }}">rym</a>
+                            </small>
+
+                        </div>
+
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div style="height:20px "></div>
+    {% endfor %}
 
 
 {% endblock %}
