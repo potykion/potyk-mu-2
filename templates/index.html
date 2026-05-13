@@ -23,7 +23,7 @@
 {% block main %}
 
     {% for genre in genres %}
-        <div style="background: {{ genre.bg_color }}; color: {{ genre.text_color }};  padding: 10px; margin-bottom: 10px; ">
+        <div style="background: {{ genre.bg_color }}; color: {{ genre.text_color }}; border: 4px solid {{ genre.text_color }}; padding: 10px; margin-bottom: 10px; ">
             <h2 style="font-style: italic; text-transform: uppercase; margin-top: 0">{{ genre.title }}</h2>
             <p class="genre-desc"><i>{{ genre.description }}</i></p>
         </div>

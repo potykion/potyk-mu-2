@@ -44,7 +44,7 @@
 <header style="padding: 20px; display: flex; gap: 10px; justify-content: center; ">
     <div id="potyk-mu-logo"
          class="header-logo"
-         style="text-decoration: none; border: 2px solid black; font-weight: bold; color: black; border-radius: 10px; padding: 5px; background: limegreen;"
+         style="text-decoration: none; border: 4px solid black; font-weight: bold; color: black; border-radius: 10px; padding: 5px; background: limegreen;"
          role="button"
          tabindex="0"
          aria-label="Воспроизвести или приостановить трек">
@@ -79,11 +79,11 @@
         if (!logo || !audio) return;
 
         /** Спокойные участки — медленный пульс; сильный бас — быстрее (до ~0.01s). */
-        const BEAT_SLOW_S = 0.55;
+        const BEAT_SLOW_S = 50;
         const BEAT_FAST_S = 0.01;
-        const BASS_BIN_COUNT = 12;
+        const BASS_BIN_COUNT = 200;
         const BASS_GAIN = 2.2;
-        const SMOOTH = 0.18;
+        const SMOOTH = 1;
 
         let audioCtx = null;
         let analyser = null;
