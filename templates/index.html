@@ -17,9 +17,16 @@
             grid-template-columns: repeat(3, 1fr);
         }
 
+        @media screen and (max-width: 600px) {
+            .album-grid {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+
         .album-card[data-track-url] {
             cursor: pointer;
         }
+
         .album-card img:hover {
             filter: saturate(2.2);
         }
@@ -94,25 +101,25 @@
 {% endblock %}
 
 {% block page_scripts %}
-<script>
-    (function () {
-        document.addEventListener('click', function (e) {
-            var card = e.target.closest('.album-card');
-            if (!card) {
-                return;
-            }
-            if (e.target.closest('a')) {
-                return;
-            }
-            var url = card.dataset.trackUrl;
-            if (!url) {
-                return;
-            }
-            if (!window.potykMu || typeof window.potykMu.loadAndPlay !== 'function') {
-                return;
-            }
-            window.potykMu.loadAndPlay(url);
-        });
-    })();
-</script>
+    <script>
+        (function () {
+            document.addEventListener('click', function (e) {
+                var card = e.target.closest('.album-card');
+                if (!card) {
+                    return;
+                }
+                if (e.target.closest('a')) {
+                    return;
+                }
+                var url = card.dataset.trackUrl;
+                if (!url) {
+                    return;
+                }
+                if (!window.potykMu || typeof window.potykMu.loadAndPlay !== 'function') {
+                    return;
+                }
+                window.potykMu.loadAndPlay(url);
+            });
+        })();
+    </script>
 {% endblock %}
