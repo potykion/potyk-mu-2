@@ -30,11 +30,7 @@
         }
 
         .header-logo--playing {
-            animation: beat 0.5s infinite;
-        }
-
-        .header-logo--playing.header-logo--playing-intense {
-            animation: beat 0.01s infinite;
+            animation: beat var(--beat-dur, 0.5s) ease-in-out infinite;
         }
     </style>
 
@@ -82,21 +78,79 @@
         const audio = document.getElementById('potyk-mu-ragga');
         if (!logo || !audio) return;
 
-        const BEAT_INTENSE_AFTER_SEC = 10.5;
+        /** Спокойные участки — медленный пульс; сильный бас — быстрее (до ~0.01s). */
+        const BEAT_SLOW_S = 0.55;
+        const BEAT_FAST_S = 0.01;
+        const BASS_BIN_COUNT = 12;
+        const BASS_GAIN = 2.2;
+        const SMOOTH = 0.18;
+
+        let audioCtx = null;
+        let analyser = null;
+        let freqData = null;
+        let graphReady = false;
+        let rafId = 0;
+        let smoothedBeatS = BEAT_SLOW_S;
+
+        function clamp(x, lo, hi) {
+            return Math.max(lo, Math.min(hi, x));
+        }
+
+        function ensureAudioGraph() {
+            if (graphReady) {
+                return Promise.resolve();
+            }
+            return new Promise(function (resolve, reject) {
+                try {
+                    const Ctx = window.AudioContext || window.webkitAudioContext;
+                    audioCtx = new Ctx();
+                    const source = audioCtx.createMediaElementSource(audio);
+                    analyser = audioCtx.createAnalyser();
+                    analyser.fftSize = 512;
+                    analyser.smoothingTimeConstant = 0.62;
+                    source.connect(analyser);
+                    analyser.connect(audioCtx.destination);
+                    freqData = new Uint8Array(analyser.frequencyBinCount);
+                    graphReady = true;
+                    resolve();
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+
+        function stopBeatLoop() {
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = 0;
+            }
+        }
+
+        function tickBeat() {
+            if (!graphReady || !analyser || audio.paused) {
+                return;
+            }
+            analyser.getByteFrequencyData(freqData);
+            var sum = 0;
+            for (var i = 0; i < BASS_BIN_COUNT; i++) {
+                sum += freqData[i];
+            }
+            var raw = sum / BASS_BIN_COUNT / 255;
+            var drive = clamp(raw * BASS_GAIN, 0, 1);
+            var target = BEAT_SLOW_S + (BEAT_FAST_S - BEAT_SLOW_S) * drive;
+            smoothedBeatS += (target - smoothedBeatS) * SMOOTH;
+            logo.style.setProperty('--beat-dur', smoothedBeatS.toFixed(3) + 's');
+            console.log(smoothedBeatS.toFixed(3) + 's');
+            rafId = requestAnimationFrame(tickBeat);
+        }
 
         function setPlaying(playing) {
             logo.classList.toggle('header-logo--playing', playing);
             if (!playing) {
-                logo.classList.remove('header-logo--playing-intense');
+                stopBeatLoop();
+                logo.style.removeProperty('--beat-dur');
+                smoothedBeatS = BEAT_SLOW_S;
             }
-        }
-
-        function syncBeatIntensity() {
-            if (audio.paused) return;
-            logo.classList.toggle(
-                'header-logo--playing-intense',
-                audio.currentTime >= BEAT_INTENSE_AFTER_SEC
-            );
         }
 
         function toggle() {
@@ -104,12 +158,21 @@
                 if (audio.ended) {
                     audio.currentTime = 0;
                 }
-                audio.play().then(function () {
-                    setPlaying(true);
-                    syncBeatIntensity();
-                }).catch(function () {
-                    setPlaying(false);
-                });
+                ensureAudioGraph()
+                    .then(function () {
+                        return audioCtx.resume();
+                    })
+                    .then(function () {
+                        return audio.play();
+                    })
+                    .then(function () {
+                        setPlaying(true);
+                        stopBeatLoop();
+                        rafId = requestAnimationFrame(tickBeat);
+                    })
+                    .catch(function () {
+                        setPlaying(false);
+                    });
             } else {
                 audio.pause();
                 setPlaying(false);
@@ -123,8 +186,6 @@
                 toggle();
             }
         });
-        audio.addEventListener('timeupdate', syncBeatIntensity);
-        audio.addEventListener('seeked', syncBeatIntensity);
         audio.addEventListener('ended', function () {
             setPlaying(false);
         });
