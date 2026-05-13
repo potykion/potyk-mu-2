@@ -23,6 +23,19 @@
                 transform: scale(1);
             }
         }
+
+        .header-logo {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .header-logo--playing {
+            animation: beat 0.5s infinite;
+        }
+
+        .header-logo--playing.header-logo--playing-intense {
+            animation: beat 0.01s infinite;
+        }
     </style>
 
     {% block style %}
@@ -33,16 +46,22 @@
 
 <body style="background: limegreen">
 <header style="padding: 20px; display: flex; gap: 10px; justify-content: center; ">
-    <div style=" text-decoration: none; border: 2px solid black; font-weight: bold; color: black; border-radius: 10px; padding: 5px; background: limegreen;   animation: beat 0.01s infinite;
-" href="/">
+    <div id="potyk-mu-logo"
+         class="header-logo"
+         style="text-decoration: none; border: 2px solid black; font-weight: bold; color: black; border-radius: 10px; padding: 5px; background: limegreen;"
+         role="button"
+         tabindex="0"
+         aria-label="Воспроизвести или приостановить трек">
 
         <span style="transform: rotate(180deg); display: inline-block">🔊</span>
         potyk-mu
         🔊
     </div>
-
-
 </header>
+
+<audio id="potyk-mu-ragga"
+       preload="metadata"
+       src="{{ url_for('static', filename='Dj Starscream, N8LOC, B Boy 3000 - Ragga 2001.mp3') }}"></audio>
 
 <main>
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -57,5 +76,59 @@
     {% block main %}
     {% endblock %}
 </main>
+<script>
+    (function () {
+        const logo = document.getElementById('potyk-mu-logo');
+        const audio = document.getElementById('potyk-mu-ragga');
+        if (!logo || !audio) return;
+
+        const BEAT_INTENSE_AFTER_SEC = 10.5;
+
+        function setPlaying(playing) {
+            logo.classList.toggle('header-logo--playing', playing);
+            if (!playing) {
+                logo.classList.remove('header-logo--playing-intense');
+            }
+        }
+
+        function syncBeatIntensity() {
+            if (audio.paused) return;
+            logo.classList.toggle(
+                'header-logo--playing-intense',
+                audio.currentTime >= BEAT_INTENSE_AFTER_SEC
+            );
+        }
+
+        function toggle() {
+            if (audio.paused) {
+                if (audio.ended) {
+                    audio.currentTime = 0;
+                }
+                audio.play().then(function () {
+                    setPlaying(true);
+                    syncBeatIntensity();
+                }).catch(function () {
+                    setPlaying(false);
+                });
+            } else {
+                audio.pause();
+                setPlaying(false);
+            }
+        }
+
+        logo.addEventListener('click', toggle);
+        logo.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggle();
+            }
+        });
+        audio.addEventListener('timeupdate', syncBeatIntensity);
+        audio.addEventListener('seeked', syncBeatIntensity);
+        audio.addEventListener('ended', function () {
+            setPlaying(false);
+        });
+    })();
+</script>
 </body>
 </html>
