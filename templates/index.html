@@ -17,8 +17,11 @@
             grid-template-columns: repeat(3, 1fr);
         }
 
-        .album-card {
+        .album-card[data-track-url] {
             cursor: pointer;
+        }
+        .album-card img:hover {
+            filter: saturate(2.2);
         }
     </style>
 
@@ -34,7 +37,9 @@
         <div class="album-grid">
             {% for album in albums %}
                 {% if genre.match_album(album) %}
-                    <div class="album-card" style="background: white; padding: 10px;">
+                    <div class="album-card"
+                         style="background: white; padding: 10px;"
+                         {% if album.track_path %}data-track-url="{{ url_for('static', filename=album.track_path) }}"{% endif %}>
                         <img src="{{ album.cover_url }}" style="width: 100%">
                         <div>
                             <div><b>{{ album.title }}</b></div>
@@ -91,18 +96,22 @@
 {% block page_scripts %}
 <script>
     (function () {
-        var lambUrl = "{{ url_for('static', filename='audio/Lamb - Lusty.mp3') }}";
         document.addEventListener('click', function (e) {
-            if (!e.target.closest('.album-card')) {
+            var card = e.target.closest('.album-card');
+            if (!card) {
                 return;
             }
             if (e.target.closest('a')) {
                 return;
             }
+            var url = card.dataset.trackUrl;
+            if (!url) {
+                return;
+            }
             if (!window.potykMu || typeof window.potykMu.loadAndPlay !== 'function') {
                 return;
             }
-            window.potykMu.loadAndPlay(lambUrl);
+            window.potykMu.loadAndPlay(url);
         });
     })();
 </script>

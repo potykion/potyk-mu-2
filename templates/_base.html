@@ -27,11 +27,17 @@
         .header-logo {
             cursor: pointer;
             user-select: none;
+
+        }
+        .header-logo:hover {
+            filter: saturate(2.2);
         }
 
         .header-logo--playing {
             animation: beat var(--beat-dur, 0.5s) ease-in-out infinite;
         }
+
+
     </style>
 
     {% block style %}
@@ -41,7 +47,7 @@
 
 
 <body style="background: limegreen">
-<header style="padding: 20px; display: flex; gap: 10px; justify-content: center; ">
+<header style="padding: 20px; display: flex; gap: 10px; justify-content: center; position: sticky;  top: 0;z-index: 1000; ">
     <div id="potyk-mu-logo"
          class="header-logo"
          style="text-decoration: none; border: 4px solid black; font-weight: bold; color: black; border-radius: 10px; padding: 5px; background: limegreen;"
@@ -57,7 +63,7 @@
 
 <audio id="potyk-mu-ragga"
        preload="metadata"
-       src="{{ url_for('static', filename='Dj Starscream, N8LOC, B Boy 3000 - Ragga 2001.mp3') }}"></audio>
+       src="{{ url_for('static', filename='audio/Dj Starscream, N8LOC, B Boy 3000 - Ragga 2001.mp3') }}"></audio>
 
 <main>
     {% with messages = get_flashed_messages(with_categories=true) %}
